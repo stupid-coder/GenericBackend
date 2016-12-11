@@ -35,8 +35,10 @@
 * 接口说明
   接口采取RESTFUL接口风格：
 
+  IP:   123.*.*.101 服务器地址
+  PORT: 8010
 ** 获取列表接口
-   URI: http://ip:port/data/{domain}/{status}/
+   URI: http://ip:port/GenericBackend/data/{domain}/{status}/
    METHOD: *GET*
    FORMAT: *JSON*
 
@@ -56,7 +58,7 @@
     | external_id | 业务定义的ID主健       |
 
 ** 获取详细接口
-   URI: http://ip:port/data/{domain}/{status}/{external_id}/
+   URI: http://ip:port/GenericBackend/data/{domain}/{status}/{external_id}/
    METHOD: *GET*
    FORMAT: *JSON*
 
@@ -74,7 +76,7 @@
     | data      | 如上 |
 
 ** 添加数据接口
-   URI: http://ip:port/data/
+   URI: http://ip:port/GenericBackend/data/
    METHOD: *POST*
    FORMAT: *JSON*
 
@@ -92,7 +94,7 @@
     | status | 是否成功：200成功，-1失败 |
 
 ** 更新接口
-   URI: http://ip:port/data/{domain}/{status}/{external_id}/
+   URI: http://ip:port/GenericBackend/data/{domain}/{status}/{external_id}/
    METHOD: *PUT*
    FORMAT: *JSON*
 
@@ -130,14 +132,14 @@
     | status | 是否成功：200成功，-1失败 |
 
 ** 对应数据大小的
-    URI: http://ip:port/count/{domain}/{status}/
+    URI: http://ip:port/GenericBackend/count/{domain}/{status}/
     METHOD: *GET*
     FORMAT: *JSON*
 
     获取domian下的所有状态为status的条数
 
 ** 对应数据大小的
-    URI: http://ip:port/count/{status}/
+    URI: http://ip:port/GenericBackend/count/{status}/
     METHOD: *GET*
     FORMAT: *JSON*
 
