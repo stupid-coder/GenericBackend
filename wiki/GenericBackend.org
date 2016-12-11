@@ -1,0 +1,144 @@
+#+TITLE: 后台接口抽象
+#+OPTIONS: ^:nil
+
+* 内部数据说明
+  由于需要抽象出一个不含前端操作逻辑的接口，后端暂时使用mysql存储一个通用表，后续将进行升级优化，使得能够尽量复用！
+
+  其中后端的存储表格式为：
+  #+BEGIN_SRC mysql
+  SET FOREIGN_KEY_CHECKS = 0;
+
+  DROP TABLE IF EXISTS `GenericData`;
+
+  CREATE TABLE `GenericData` (
+  `id` INT(10) NOT NULL AUTO_INCREMENT,
+  `external_id` VARCHAR(20) NOT NULL,
+  `domain` VARCHAR(20) NOT NULL,
+  `meta_info` TEXT NOT NULL,
+  `data` TEXT NOT NULL,
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status` VARCHAR(10) NOT NULL DEFAULT "",
+  PRIMARY KEY(`id`)
+  ) ENGINE=InnoDB DEFAULT CHARSET = utf8;
+
+  CREATE INDEX GenericDataIndex ON GenericData(external_id,domain,status);
+  #+END_SRC
+
+  说明：
+  + id :: 为mysql内部的id健，不对外暴露
+  + external_id :: 为前端定义的有意义的id，例如roadmap中的每个病人分配的体检号，需要外部录入
+  + domain :: 表示当前这条数据是属于那个域下的，这里为认为逻辑划分，例如：录入人员信息表，随访一的表等等。
+  + meta_info :: 前端进行存储，前端进行解析，一般为数据的元信息
+  + data :: 前端存储，前端解析，一般为数据主体部分
+  + status :: 用来对数据进行一些状态的改变，可以只筛选该状态下的数据，暂不支持逻辑大小比较
+
+* 接口说明
+  接口采取RESTFUL接口风格：
+
+** 获取列表接口
+   URI: http://ip:port/data/{domain}/{status}/
+   METHOD: *GET*
+   FORMAT: *JSON*
+
+***  请求参数说明
+    #+CAPTION: 请求参数
+    | 字段   | 说明                             |
+    |--------+----------------------------------|
+    | domain | 请求数据所属的域，随业务进行变动 |
+    | status | 请求数据的状态，虽业务进行变动   |
+*** 相应结构体
+    List<GenericData> GenericData具体字段如下：
+    #+CAPTION: 相应结构体
+    | 字段        | 说明                   |
+    |-------------+------------------------|
+    | data        | 业务存储的数据         |
+    | meta_info   | 业务存储的数据的元信息 |
+    | external_id | 业务定义的ID主健       |
+
+** 获取详细接口
+   URI: http://ip:port/data/{domain}/{status}/{external_id}/
+   METHOD: *GET*
+   FORMAT: *JSON*
+
+*** 请求参数说明
+    #+CAPTION: 请求参数
+    | 字段        | 说明 |
+    |-------------+------|
+    | domain      | 如上 |
+    | status      | 如上 |
+    | external_id | 业务定义的ID主健 |
+*** 相应结构体
+    | 字段      | 说明 |
+    |-----------+------|
+    | meta_info | 如上 |
+    | data      | 如上 |
+
+** 添加数据接口
+   URI: http://ip:port/data/
+   METHOD: *POST*
+   FORMAT: *JSON*
+
+*** 请求参数说明
+    | 字段        | 说明 |
+    |-------------+------|
+    | domain      |      |
+    | status      |      |
+    | external_id |      |
+    | meta_info   |      |
+    | data        |      |
+
+*** 相应结构体
+    | 字段 | 说明 |
+    | status | 是否成功：200成功，-1失败 |
+
+** 更新接口
+   URI: http://ip:port/data/{domain}/{status}/{external_id}/
+   METHOD: *PUT*
+   FORMAT: *JSON*
+
+*** 请求参数说明
+    | 字段        | 说明 |
+    |-------------+------|
+    | domain      |      |
+    | status      |      |
+    | external_id |      |
+    | meta_info   |      |
+    | data        |      |
+
+*** 相应结构体
+    | 字段 | 说明 |
+    | status | 是否成功：200成功，-1失败 |
+
+*** 追加更新接口
+   URI: http://ip:port/data/{domain}/{status}/{external_id}/{old_status}/
+   METHOD: *PUT*
+   FORMAT: *JSON*
+
+*** 请求参数说明
+    | 字段        | 说明                                 |
+    |-------------+--------------------------------------|
+    | domain      |                                      |
+    | status      |                                      |
+    | external_id |                                      |
+    | meta_info   |                                      |
+    | data        |                                      |
+    | old_status  | 表示将更新的数据的status更新成的状态 |
+
+
+*** 相应结构体
+    | 字段 | 说明 |
+    | status | 是否成功：200成功，-1失败 |
+
+** 对应数据大小的
+    URI: http://ip:port/count/{domain}/{status}/
+    METHOD: *GET*
+    FORMAT: *JSON*
+
+    获取domian下的所有状态为status的条数
+
+** 对应数据大小的
+    URI: http://ip:port/count/{status}/
+    METHOD: *GET*
+    FORMAT: *JSON*
+
+    获取所有状态为status的条数
